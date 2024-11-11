@@ -1,0 +1,81 @@
+#main-content {
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+  }
+  
+  #main-page {
+    display: none;
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+  
+  #background-image {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+  
+  #ride-images {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+  }
+  
+  .ride-logo {
+    position: absolute;
+    cursor: pointer;
+    transition: transform 0.3s;
+  }
+  
+  .ride-logo:hover {
+    transform: scale(1.2);
+  }
+  
+  #ride1 {
+    top: 32%;
+    left: 38%;
+    width: 10%;
+  }
+  
+  #ride2 {
+    top: 60%;
+    left: 55%;
+    width: 15%;
+  }
+  
+  #ride3 {
+    top: 76.8%;
+    left: 64.5%;
+    width: 14%;
+  }
+  
+  #ride4 {
+    top: 30%;
+    left: 72%;
+    width: 10%;
+  }
+  
+  #ride5 {
+    top: 53%;
+    left: 3%;
+    width: 15%;
+  }
+
+  #ride6 {
+    top: 26%;
+    left: 29%;
+    width: 15%;
+  }
+  
+  #logo-image {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100px; /* Reduced logo size */
+  }
+  

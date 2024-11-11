@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pixel Game</title>
+    <style>
+        @font-face {
+            font-family: 'Sam3KRFont';
+            src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_eight@1.0/Sam3KRFont.woff') format('woff');
+            font-weight: normal;
+            font-style: normal;
+        }
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+            background-color: #87CEEB;
+            font-family: 'Sam3KRFont', Arial, sans-serif;
+        }
+        #gameCanvas {
+            display: block;
+            margin: auto;
+            background: url('background.png') no-repeat center center;
+            background-size: cover;
+            border: 3px solid #000;
+        }
+        .dialogue-box {
+            position: absolute;
+            bottom: 10%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            background: #fff;
+            border: 3px solid #000;
+            padding: 20px;
+            font-size: 18px;
+            color: #000;
+        }
+        .dialogue-button {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            background: #f0f0f0;
+            border: 2px solid #000;
+            cursor: pointer;
+        }
+        .joystick {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            transform: none;
+            width: 150px;
+            height: 150px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 50%;
+            touch-action: none;
+        }
+        .joystick-handle {
+            width: 50px;
+            height: 50px;
+            background: #000;
+            border-radius: 50%;
+            position: relative;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas" width="400" height="700"></canvas>
+    <div id="dialogueBox" class="dialogue-box" style="display:none;">
+        <div id="dialogueText">Hello there!</div>
+        <button id="dialogueButton" class="dialogue-button">다음</button>
+    </div>
+    <div class="joystick" id="joystick">
+        <div class="joystick-handle" id="joystickHandle"></div>
+    </div>
+    
+    <script>
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+        const dialogueBox = document.getElementById("dialogueBox");
+        const dialogueText = document.getElementById("dialogueText");
+        const dialogueButton = document.getElementById("dialogueButton");
+
+        const joystick = document.getElementById("joystick");
+        const joystickHandle = document.getElementById("joystickHandle");
+
+        let player = {
+            x: 175,
+            y: 600, // 캐릭터 위치를 더 위로 올림
+            width: 50,
+            height: 50,
+            speed: 2,
+            sprite: new Image()
+        };
+        player.sprite.src = 'player.gif';
+
+        let dialogueIndex = 0;
+        const dialogues = [
+            "반가습니다.",
+            "농이공원 \"별하제\"에 오시는게 환영합니다.",
+            "학교 고꿈에 별하제의 조각이 숫겨져 있습니다.",
+            "별하제의 조각을 찾아주세요!"
+        ];
+
+        let joystickActive = false;
+        let joystickStartX, joystickStartY;
+        let joystickOffsetX = 0, joystickOffsetY = 0;
+
+        joystick.addEventListener("touchstart", (e) => {
+            e.preventDefault();
+            joystickActive = true;
+            const touch = e.touches[0];
+            joystickStartX = touch.clientX;
+            joystickStartY = touch.clientY;
+        });
+
+        joystick.addEventListener("touchmove", (e) => {
+            if (!joystickActive) return;
+            e.preventDefault();
+            const touch = e.touches[0];
+            joystickOffsetX = touch.clientX - joystickStartX;
+            joystickOffsetY = touch.clientY - joystickStartY;
+
+            // Limit joystick movement
+            const maxDistance = 50;
+            const distance = Math.sqrt(joystickOffsetX ** 2 + joystickOffsetY ** 2);
+            if (distance > maxDistance) {
+                const angle = Math.atan2(joystickOffsetY, joystickOffsetX);
+                joystickOffsetX = Math.cos(angle) * maxDistance;
+                joystickOffsetY = Math.sin(angle) * maxDistance;
+            }
+
+            joystickHandle.style.transform = `translate(${joystickOffsetX}px, ${joystickOffsetY}px)`;
+        });
+
+        joystick.addEventListener("touchend", () => {
+            joystickActive = false;
+            joystickOffsetX = 0;
+            joystickOffsetY = 0;
+            joystickHandle.style.transform = "translate(-50%, -50%)";
+        });
+
+        joystick.addEventListener("mousedown", (e) => {
+            e.preventDefault();
+            joystickActive = true;
+            joystickStartX = e.clientX;
+            joystickStartY = e.clientY;
+        });
+
+        joystick.addEventListener("mousemove", (e) => {
+            if (!joystickActive) return;
+            e.preventDefault();
+            joystickOffsetX = e.clientX - joystickStartX;
+            joystickOffsetY = e.clientY - joystickStartY;
+
+            // Limit joystick movement
+            const maxDistance = 50;
+            const distance = Math.sqrt(joystickOffsetX ** 2 + joystickOffsetY ** 2);
+            if (distance > maxDistance) {
+                const angle = Math.atan2(joystickOffsetY, joystickOffsetX);
+                joystickOffsetX = Math.cos(angle) * maxDistance;
+                joystickOffsetY = Math.sin(angle) * maxDistance;
+            }
+
+            joystickHandle.style.transform = `translate(${joystickOffsetX}px, ${joystickOffsetY}px)`;
+        });
+
+        joystick.addEventListener("mouseup", () => {
+            joystickActive = false;
+            joystickOffsetX = 0;
+            joystickOffsetY = 0;
+            joystickHandle.style.transform = "translate(-50%, -50%)";
+        });
+
+        joystick.addEventListener("mouseleave", () => {
+            joystickActive = false;
+            joystickOffsetX = 0;
+            joystickOffsetY = 0;
+            joystickHandle.style.transform = "translate(-50%, -50%)";
+        });
+
+        function update() {
+            if (joystickOffsetY < -10) player.y -= player.speed;
+            if (joystickOffsetY > 10) player.y += player.speed;
+            if (joystickOffsetX < -10) player.x -= player.speed;
+            if (joystickOffsetX > 10) player.x += player.speed;
+
+            // Boundaries
+            if (player.x < 0) player.x = 0;
+            if (player.y < 0) player.y = 0;
+            if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
+            if (player.y + player.height > canvas.height) player.y = canvas.height - player.height;
+
+            // Trigger dialogue
+            if (player.x > 220 && player.x < 250 && player.y > 270 && player.y < 350) {
+                showDialogue();
+            }
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw player
+            ctx.drawImage(player.sprite, player.x, player.y, player.width, player.height);
+        }
+
+        function gameLoop() {
+            update();
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        function showDialogue() {
+            dialogueBox.style.display = "block";
+            dialogueText.innerText = dialogues[dialogueIndex];
+        }
+
+        dialogueButton.addEventListener("click", () => {
+            dialogueIndex++;
+            if (dialogueIndex < dialogues.length) {
+                dialogueText.innerText = dialogues[dialogueIndex];
+            } else {
+                dialogueBox.style.display = "none";
+                dialogueIndex = 0;
+                // Display final image
+                document.body.innerHTML = '<img src="pice.png" alt="Sample Image" style="width:100%; height:100%; object-fit:cover;">';
+            }
+        });
+
+        gameLoop();
+    </script>
+</body>
+</html>
